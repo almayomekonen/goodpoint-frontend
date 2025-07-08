@@ -32,14 +32,6 @@ interface AddClassPopupContentProps {
   classType: "studyGroup" | "class";
 }
 
-/**
- * AddClassPopupContent is a component that renders the content for adding or editing a class or study group in a popup.
- * @component
- * @param {Function} handleClose - The function to handle closing the popup.
- * @param {ClassFormKeys | StudyGroupFormKeys} editContent - The data to be edited of either a class or study group. (Optional)
- * @param {'studyGroup' | 'class'} classType - The type of the content: 'studyGroup' for a study group, 'class' for a class.
- * @returns {JSX.Element} A React element representing the AddClassPopupContent component.
- */
 const AddClassPopupContent: FC<AddClassPopupContentProps> = ({
   handleClose,
   editContent,

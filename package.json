@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "vite --port 3000 --open --host",
-    "build": "tsc && vite build --outDir build",
+    "build": "tsc && vite build --outDir dist",
     "preview": "vite preview",
     "lint": "eslint \"{src,apps,libs,test}/**/*.{ts,tsx}\" --fix",
     "format": "prettier --write src/",

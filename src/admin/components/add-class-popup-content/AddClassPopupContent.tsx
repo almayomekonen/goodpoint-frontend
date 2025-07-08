@@ -40,7 +40,11 @@ interface AddClassPopupContentProps {
  * @param {'studyGroup' | 'class'} classType - The type of the content: 'studyGroup' for a study group, 'class' for a class.
  * @returns {JSX.Element} A React element representing the AddClassPopupContent component.
  */
-const AddClassPopupContent: FC = ({ handleClose, editContent, classType }) => {
+const AddClassPopupContent: FC<AddClassPopupContentProps> = ({
+  handleClose,
+  editContent,
+  classType,
+}) => {
   const { data: teachersDetails } = useGetTeachersQuery();
   const addOrEditClass = useAddOrEditClass();
   const addOrEditStudyGroup = useAddOrEditStudyGroup();

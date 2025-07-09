@@ -1,7 +1,18 @@
 import axios from "axios";
 
 // הגדרת baseURL לפי הסביבה
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const baseURL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.MODE === "production"
+    ? "https://goodpoint-backend-production.up.railway.app"
+    : "http://localhost:8080");
+
+// Debug logs
+console.log("🔧 Axios Config:", {
+  VITE_API_URL: import.meta.env.VITE_API_URL,
+  MODE: import.meta.env.MODE,
+  baseURL: baseURL,
+});
 
 // הגדרת axios defaults
 axios.defaults.baseURL = baseURL;

@@ -83,7 +83,29 @@ function App() {
       .split(";")
       .find((c) => c.trim().startsWith("kloklokl="));
     console.log("🔍 App: Token cookie:", token);
+
+    // בדיקה עם js-cookie
+    import("js-cookie").then((Cookies) => {
+      const cookieToken = Cookies.default.get("kloklokl");
+      console.log("🔍 App: js-cookie token:", cookieToken);
+    });
   }, [isAuthenticated]);
+
+  // Debug נוסף לבדיקת הטוקן בכל רענון
+  useEffect(() => {
+    console.log("🔄 App: Page loaded/refreshed");
+    console.log("🔄 App: Initial auth state:", isAuthenticated);
+
+    // בדיקה מיידית של הטוקן
+    import("js-cookie").then((Cookies) => {
+      const token = Cookies.default.get("kloklokl");
+      console.log("🔄 App: Token on page load:", {
+        exists: !!token,
+        length: token?.length,
+        firstChars: token?.substring(0, 20) + "...",
+      });
+    });
+  }, []);
 
   return (
     <RTL active={dir === "rtl"}>

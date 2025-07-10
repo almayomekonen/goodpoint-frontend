@@ -186,6 +186,24 @@ axios.interceptors.response.use(
           tokenLength: token?.length,
           tokenValue: token?.substring(0, 20) + "...",
         });
+
+        // בדיקה מפורטת של כל הcookies אחרי הlogin
+        const allCookiesAfterLogin = document.cookie.split(";").reduce(
+          (acc, cookie) => {
+            const [name, value] = cookie.trim().split("=");
+            acc[name] = value;
+            return acc;
+          },
+          {} as Record<string, string>
+        );
+        console.log("🍪 POST-LOGIN All Cookies:", allCookiesAfterLogin);
+
+        // בדיקה אם יש Set-Cookie בheaders
+        console.log(
+          "🔍 POST-LOGIN Set-Cookie Headers:",
+          response.headers["set-cookie"]
+        );
+        console.log("🔍 POST-LOGIN Response Headers:", response.headers);
       }, 100);
     }
 

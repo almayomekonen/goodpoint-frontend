@@ -66,14 +66,24 @@ export const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   const { isLoading, data, error } = useQuery(
     ["get-user-data"],
     async () => {
-      const { data } = await axios.get<UserInfoContextType>(
-        "/api/staff/get-user-data"
-      );
-      return data;
+      console.log("🔍 UserContext: Fetching user data...");
+      console.log("🔍 UserContext: isAuthenticated =", isAuthenticated);
+      console.log("🔍 UserContext: API URL =", axios.defaults.baseURL);
+
+      try {
+        const { data } = await axios.get<UserInfoContextType>(
+          "/api/staff/get-user-data"
+        );
+        console.log("✅ UserContext: User data fetched successfully", data);
+        return data;
+      } catch (error) {
+        console.error("❌ UserContext: Error fetching user data:", error);
+        throw error;
+      }
     },
     {
       enabled: isAuthenticated,
-      retry: 1,
+      retry: 2,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
     }
@@ -81,6 +91,7 @@ export const UserProvider: FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     if (data) {
+      console.log("🔧 UserContext: Processing user data...");
       // יצירת עותק של הנתונים כדי לא לשנות את המקור
       const processedData = {
         ...data,
@@ -100,11 +111,20 @@ export const UserProvider: FC<PropsWithChildren> = ({ children }) => {
 
       setUser(processedData);
       changeLang(processedData.preferredLanguage);
+      console.log("✅ UserContext: User data processed and set");
     }
   }, [data, setUser, changeLang]);
 
+  useEffect(() => {
+    console.log("🔍 UserContext: Auth state changed:", {
+      isAuthenticated,
+      isLoading,
+      error: !!error,
+    });
+  }, [isAuthenticated, isLoading, error]);
+
   if (error) {
-    console.error("Error fetching user data:", error);
+    console.error("❌ UserContext: Error in user data fetch:", error);
   }
 
   return isLoading && isAuthenticated ? (

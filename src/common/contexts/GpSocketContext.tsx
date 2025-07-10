@@ -54,14 +54,24 @@ export const GpSocketContext: FC<PropsWithChildren> = ({ children }) => {
   const getToken = useGetAccessToken();
 
   useEffect(() => {
+    console.log("🔍 GpSocketContext: Auth state changed:", isAuthenticated);
+
     if (!isAuthenticated) {
+      console.log(
+        "🔍 GpSocketContext: User not authenticated, removing socket listeners"
+      );
       socket.removeAllListeners();
       return;
     }
 
     const token = getToken();
-    if (!token) throw Error("problem with user cookies");
+    console.log("🔍 GpSocketContext: Token exists:", !!token);
+    if (!token) {
+      console.error("❌ GpSocketContext: No token found in cookies");
+      throw Error("problem with user cookies");
+    }
     const user = parseJwt(token);
+    console.log("🔍 GpSocketContext: Parsed user from token:", user);
     socket.on(`received-message/${user.id}`, (data: ReceivedGp) => {
       const contextSchoolId = queryClient.getQueryData<UserInfoContextType>(
         ["get-user-data"],

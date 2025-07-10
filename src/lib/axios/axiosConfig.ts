@@ -80,8 +80,22 @@ if (token) {
 
 // הגדרת axios defaults
 axios.defaults.baseURL = baseURL;
-axios.defaults.timeout = 10000;
+axios.defaults.timeout = 30000; // הגדלת timeout ל-30 שניות
 axios.defaults.withCredentials = true;
+
+// הגדרות CORS נוספות
+axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
+axios.defaults.headers.common["Access-Control-Allow-Methods"] =
+  "GET, POST, PUT, DELETE, OPTIONS";
+axios.defaults.headers.common["Access-Control-Allow-Headers"] =
+  "Origin, X-Requested-With, Content-Type, Accept, Authorization";
+
+console.log("🔧 Axios Defaults:", {
+  baseURL: axios.defaults.baseURL,
+  timeout: axios.defaults.timeout,
+  withCredentials: axios.defaults.withCredentials,
+  headers: axios.defaults.headers.common,
+});
 
 // בדיקת חיבור לשרת
 const checkServerHealth = async () => {
@@ -203,7 +217,24 @@ axios.interceptors.response.use(
       statusText: error.response?.statusText,
       message: error.message,
       data: error.response?.data,
+      networkError: !error.response && error.request,
+      timeoutError: error.code === "ECONNABORTED",
     });
+
+    // debug מיוחד לשגיאות login
+    if (error.config?.url?.includes("/login")) {
+      console.error("🔑 LOGIN ERROR:", {
+        url: error.config.url,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.message,
+        data: error.response?.data,
+        networkError: !error.response && error.request,
+        timeoutError: error.code === "ECONNABORTED",
+        request: error.request,
+        response: error.response,
+      });
+    }
 
     // טיפול בשגיאות 401 - אימות נכשל
     if (error.response?.status === 401) {

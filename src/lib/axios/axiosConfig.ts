@@ -83,18 +83,10 @@ axios.defaults.baseURL = baseURL;
 axios.defaults.timeout = 30000; // הגדלת timeout ל-30 שניות
 axios.defaults.withCredentials = true;
 
-// הגדרות CORS נוספות
-axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
-axios.defaults.headers.common["Access-Control-Allow-Methods"] =
-  "GET, POST, PUT, DELETE, OPTIONS";
-axios.defaults.headers.common["Access-Control-Allow-Headers"] =
-  "Origin, X-Requested-With, Content-Type, Accept, Authorization";
-
 console.log("🔧 Axios Defaults:", {
   baseURL: axios.defaults.baseURL,
   timeout: axios.defaults.timeout,
   withCredentials: axios.defaults.withCredentials,
-  headers: axios.defaults.headers.common,
 });
 
 // בדיקת חיבור לשרת

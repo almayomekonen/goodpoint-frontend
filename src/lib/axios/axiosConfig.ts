@@ -102,11 +102,22 @@ if (import.meta.env.MODE !== "development") {
 // Interceptor להוספת headers נוספים במידת הצורך
 axios.interceptors.request.use(
   (config) => {
+    // וודא שיש baseURL בכל request
+    if (!config.baseURL) {
+      config.baseURL = baseURL;
+    }
+
+    // כפה JSON response
+    config.headers.set("Accept", "application/json");
+    config.headers.set("Content-Type", "application/json");
+
     console.log("🚀 API Request:", {
       url: config.url,
       method: config.method,
       baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`,
       withCredentials: config.withCredentials,
+      headers: config.headers,
     });
     return config;
   },
@@ -123,7 +134,24 @@ axios.interceptors.response.use(
       url: response.config.url,
       status: response.status,
       statusText: response.statusText,
+      contentType: response.headers["content-type"],
+      dataType: typeof response.data,
+      isHTML:
+        typeof response.data === "string" &&
+        response.data.includes("<!DOCTYPE html>"),
     });
+
+    // אם השרת מחזיר HTML במקום JSON, זה אומר שיש בעיה
+    if (
+      typeof response.data === "string" &&
+      response.data.includes("<!DOCTYPE html>")
+    ) {
+      console.error(
+        "❌ Server returned HTML instead of JSON - this indicates a routing issue"
+      );
+      throw new Error("Server returned HTML instead of JSON");
+    }
+
     return response;
   },
   (error) => {

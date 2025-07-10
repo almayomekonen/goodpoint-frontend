@@ -13,7 +13,7 @@ import { Updater, useImmer } from "use-immer";
 import { useIsAuthenticated } from "@hilma/auth";
 import { DEFAULT_LANG } from "../../i18n/i18n-consts";
 import { Language } from "../../i18n/init-i18n";
-import { useChangeLanguage } from "../../i18n/mainI18n";
+import { useChangeLanguage, useLanguage } from "../../i18n/mainI18n";
 import { sortObjBy } from "../functions";
 
 import { ClassList, StarredStudyGroup } from "../types/UserContext.type";
@@ -62,6 +62,7 @@ export const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   const [user, setUser] = useImmer<UserInfoContextType>(initialValues);
   const isAuthenticated = useIsAuthenticated();
   const changeLang = useChangeLanguage();
+  const currentLang = useLanguage();
 
   const { isLoading, data, error } = useQuery(
     ["get-user-data"],
@@ -71,11 +72,23 @@ export const UserProvider: FC<PropsWithChildren> = ({ children }) => {
       console.log("🔍 UserContext: API URL =", axios.defaults.baseURL);
 
       try {
-        const { data } = await axios.get<UserInfoContextType>(
-          "/api/staff/get-user-data"
+        const response = await axios.get("/api/staff/get-user-data");
+
+        console.log(
+          "✅ UserContext: User data fetched successfully",
+          response.data
         );
-        console.log("✅ UserContext: User data fetched successfully", data);
-        return data;
+
+        // בדיקה נוספת שהתשובה היא JSON ולא HTML
+        if (
+          typeof response.data === "string" &&
+          response.data.includes("<!DOCTYPE html>")
+        ) {
+          console.error("❌ UserContext: Server returned HTML instead of JSON");
+          throw new Error("Server returned HTML instead of JSON");
+        }
+
+        return response.data as UserInfoContextType;
       } catch (error) {
         console.error("❌ UserContext: Error fetching user data:", error);
         throw error;
@@ -90,8 +103,23 @@ export const UserProvider: FC<PropsWithChildren> = ({ children }) => {
   );
 
   useEffect(() => {
-    if (data) {
+    if (data && typeof data === "object" && !Array.isArray(data)) {
       console.log("🔧 UserContext: Processing user data...");
+
+      // בדיקה שהנתונים הם באמת אובייקט משתמש תקין
+      if (!data.username && !data.firstName) {
+        console.error("❌ UserContext: Invalid user data received:", data);
+        return;
+      }
+
+      // אם המשתמש כבר קיים עם אותו username, אל תעבד שוב
+      if (user.username && user.username === data.username) {
+        console.log(
+          "✅ UserContext: User data already processed for this user"
+        );
+        return;
+      }
+
       // יצירת עותק של הנתונים כדי לא לשנות את המקור
       const processedData = {
         ...data,
@@ -110,10 +138,32 @@ export const UserProvider: FC<PropsWithChildren> = ({ children }) => {
       };
 
       setUser(processedData);
-      changeLang(processedData.preferredLanguage);
+      console.log(
+        "🔄 UserContext: Current language:",
+        currentLang,
+        "Preferred language:",
+        processedData.preferredLanguage
+      );
+
+      // שנה שפה רק אם השפה המועדפת שונה מהנוכחית
+      if (processedData.preferredLanguage !== currentLang) {
+        console.log(
+          "🔄 UserContext: Changing language to:",
+          processedData.preferredLanguage
+        );
+        changeLang(processedData.preferredLanguage);
+      } else {
+        console.log(
+          "✅ UserContext: Language is already correct, no change needed"
+        );
+      }
+
       console.log("✅ UserContext: User data processed and set");
+    } else if (data && typeof data === "string") {
+      console.error("❌ UserContext: Received HTML instead of JSON user data");
+      console.error("❌ UserContext: This indicates a server routing issue");
     }
-  }, [data, setUser, changeLang]);
+  }, [data, setUser, changeLang, currentLang, user.username]);
 
   useEffect(() => {
     console.log("🔍 UserContext: Auth state changed:", {

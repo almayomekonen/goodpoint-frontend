@@ -120,79 +120,91 @@ export const GoodPointReceiverList: React.FC<GoodPointReceiverListProps> = ({
         scrollableTarget="scrollableDiv"
       >
         <Box className="good-point-receiver-list">
-          {usersPages?.pages.map((studentsObj, objIndex, PagesArr) =>
-            Object.keys(studentsObj).map((letter, index) => {
-              let showLetter = true;
-              if (index === 0 && objIndex > 0) {
-                const previousLetter = Object.keys(PagesArr[objIndex - 1]).at(
-                  -1
-                );
-                if (previousLetter === letter) showLetter = false;
-              }
+          {usersPages?.pages &&
+            Array.isArray(usersPages.pages) &&
+            usersPages.pages.map(
+              (studentsObj, objIndex, PagesArr) =>
+                studentsObj &&
+                Object.keys(studentsObj).map((letter, index) => {
+                  let showLetter = true;
+                  if (index === 0 && objIndex > 0) {
+                    const previousLetter = Object.keys(
+                      PagesArr[objIndex - 1] || {}
+                    ).at(-1);
+                    if (previousLetter === letter) showLetter = false;
+                  }
 
-              return (
-                <Box key={index} className="good-point-receiver-letter-group">
-                  {showLetter && !isGroupSending && (
-                    <Typography className="group-letter">{letter}</Typography>
-                  )}
-                  <Box className="good-point-receiver-students-group">
-                    {studentsObj[letter]?.map((user) => {
-                      const card = (
-                        <UserCard
-                          checkbox={isGroupSending}
-                          isChecked={messageReceivers.some(
-                            (currUser) => currUser.id === user.id
-                          )}
-                          onCheckBoxChange={() =>
-                            handleGroupMessageReceiverSelect({
-                              id: user.id as number,
-                              firstName: user.firstName,
-                              lastName: user.lastName,
-                              gpCount: user.gpCount,
-                              gender: user.gender,
-                              class: { ...user.class },
-                            })
-                          }
-                          cardType="user-class-gpCount"
-                          firstName={user.firstName}
-                          lastName={user.lastName}
-                          classRoom={user.class}
-                          gpCount={user.gpCount}
-                        />
-                      );
-
-                      if (isGroupSending)
-                        return (
-                          <div key={user.id}>
-                            {card}
-                            <Box
-                              className="user-card-border-bottom"
-                              width={"100%"}
-                            />
-                          </div>
-                        );
-                      else
-                        return (
-                          <button
-                            onClick={() => navigateToChat(user as ChatStudent)}
-                            className="clean-no-style-button"
-                            key={user.id}
-                          >
-                            {card}
-                            {isDesktop() && (
-                              <Box
-                                className="user-card-border-bottom"
-                                width={"100%"}
+                  return (
+                    <Box
+                      key={index}
+                      className="good-point-receiver-letter-group"
+                    >
+                      {showLetter && !isGroupSending && (
+                        <Typography className="group-letter">
+                          {letter}
+                        </Typography>
+                      )}
+                      <Box className="good-point-receiver-students-group">
+                        {Array.isArray(studentsObj[letter]) &&
+                          studentsObj[letter].map((user) => {
+                            const card = (
+                              <UserCard
+                                checkbox={isGroupSending}
+                                isChecked={messageReceivers.some(
+                                  (currUser) => currUser.id === user.id
+                                )}
+                                onCheckBoxChange={() =>
+                                  handleGroupMessageReceiverSelect({
+                                    id: user.id as number,
+                                    firstName: user.firstName,
+                                    lastName: user.lastName,
+                                    gpCount: user.gpCount,
+                                    gender: user.gender,
+                                    class: { ...user.class },
+                                  })
+                                }
+                                cardType="user-class-gpCount"
+                                firstName={user.firstName}
+                                lastName={user.lastName}
+                                classRoom={user.class}
+                                gpCount={user.gpCount}
                               />
-                            )}
-                          </button>
-                        );
-                    })}
-                  </Box>
-                </Box>
-              );
-            })
-          )}
+                            );
+
+                            if (isGroupSending)
+                              return (
+                                <div key={user.id}>
+                                  {card}
+                                  <Box
+                                    className="user-card-border-bottom"
+                                    width={"100%"}
+                                  />
+                                </div>
+                              );
+                            else
+                              return (
+                                <button
+                                  onClick={() =>
+                                    navigateToChat(user as ChatStudent)
+                                  }
+                                  className="clean-no-style-button"
+                                  key={user.id}
+                                >
+                                  {card}
+                                  {isDesktop() && (
+                                    <Box
+                                      className="user-card-border-bottom"
+                                      width={"100%"}
+                                    />
+                                  )}
+                                </button>
+                              );
+                          })}
+                      </Box>
+                    </Box>
+                  );
+                })
+            )}
         </Box>
         {isFetchingNextPage && (
           <Box padding="1rem">

@@ -108,8 +108,8 @@ axios.interceptors.request.use(
     }
 
     // כפה JSON response
-    config.headers.set("Accept", "application/json");
-    config.headers.set("Content-Type", "application/json");
+    config.headers["Accept"] = "application/json";
+    config.headers["Content-Type"] = "application/json";
 
     console.log("🚀 API Request:", {
       url: config.url,

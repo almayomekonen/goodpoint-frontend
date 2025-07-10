@@ -24,6 +24,17 @@ console.log("🔍 Token Check:", {
   cookieName: ACCESS_TOKEN_NAME,
 });
 
+// בדיקת כל הcookies
+const allCookies = document.cookie.split(";").reduce(
+  (acc, cookie) => {
+    const [name, value] = cookie.trim().split("=");
+    acc[name] = value;
+    return acc;
+  },
+  {} as Record<string, string>
+);
+console.log("🍪 All Cookies:", allCookies);
+
 // בדיקת תוקף הטוקן
 if (token) {
   try {
@@ -119,6 +130,16 @@ axios.interceptors.request.use(
       withCredentials: config.withCredentials,
       headers: config.headers,
     });
+
+    // debug מיוחד לbקשות login
+    if (config.url?.includes("/login")) {
+      console.log("🔑 LOGIN REQUEST:", {
+        url: config.url,
+        data: config.data,
+        headers: config.headers,
+        withCredentials: config.withCredentials,
+      });
+    }
     return config;
   },
   (error) => {
@@ -140,6 +161,27 @@ axios.interceptors.response.use(
         typeof response.data === "string" &&
         response.data.includes("<!DOCTYPE html>"),
     });
+
+    // debug מיוחד לresponse של login
+    if (response.config.url?.includes("/login")) {
+      console.log("🔑 LOGIN RESPONSE:", {
+        url: response.config.url,
+        status: response.status,
+        data: response.data,
+        setCookieHeader: response.headers["set-cookie"],
+        allHeaders: response.headers,
+      });
+
+      // בדוק אם הטוקן נשמר אחרי הlogin
+      setTimeout(() => {
+        const token = Cookies.get(ACCESS_TOKEN_NAME);
+        console.log("🔍 POST-LOGIN Token Check:", {
+          tokenExists: !!token,
+          tokenLength: token?.length,
+          tokenValue: token?.substring(0, 20) + "...",
+        });
+      }, 100);
+    }
 
     // אם השרת מחזיר HTML במקום JSON, זה אומר שיש בעיה
     if (

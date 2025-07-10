@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import {
   AuthProvider,
@@ -72,6 +73,17 @@ function App() {
 
   // Debug information
   console.log("🔍 App: Auth state:", { isAuthenticated, isInDesktop });
+
+  // debug cookies במיוחד
+  useEffect(() => {
+    const allCookies = document.cookie;
+    console.log("🍪 App: All cookies:", allCookies);
+
+    const token = document.cookie
+      .split(";")
+      .find((c) => c.trim().startsWith("kloklokl="));
+    console.log("🔍 App: Token cookie:", token);
+  }, [isAuthenticated]);
 
   return (
     <RTL active={dir === "rtl"}>
